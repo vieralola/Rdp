@@ -17,16 +17,10 @@ steps:
   - name: Info Pemilik VPS (Viera)
     shell: powershell
     run: |
-      Write-Host "=========================================="
-      Write-Host " VPS RDP MILIK: Viera"
-      Write-Host " LOKASI: Indonesia"
-      Write-Host "=========================================="
-
-      Get-CimInstance Win32_ComputerSystem |
-        Select-Object Name, TotalPhysicalMemory
-
-      Get-CimInstance Win32_Processor |
-        Select-Object Name
+      Write-Host "VPS RDP MILIK: Viera"
+      Write-Host "LOKASI: Indonesia"
+      Get-CimInstance Win32_ComputerSystem | Select-Object Name, TotalPhysicalMemory
+      Get-CimInstance Win32_Processor | Select-Object Name
 
   - name: Install Tailscale
     shell: powershell
@@ -43,31 +37,18 @@ steps:
   - name: Configure Windows RDP
     shell: powershell
     run: |
-      $Password = ConvertTo-SecureString "Viera123!@" -AsPlainText -Force
-
+      $Password = ConvertTo-SecureString "GantiPasswordKuat123!" -AsPlainText -Force
       Set-LocalUser -Name "runneradmin" -Password $Password
-
-      Set-ItemProperty `
-        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
-        -Name "fDenyTSConnections" -Value 0
-
-      Set-ItemProperty `
-        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-        -Name "UserAuthentication" -Value 1
-
+      Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+      Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
       Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
   - name: Display Tailscale IP
     shell: powershell
     run: |
-      Write-Host "=========================================="
-      Write-Host " RDP VIERA SIAP DIGUNAKAN"
-      Write-Host "=========================================="
-
+      Write-Host "RDP VIERA SIAP DIGUNAKAN"
       & "C:\Program Files\Tailscale\tailscale.exe" ip -4
-
       Write-Host "USERNAME: runneradmin"
-      Write-Host "PASSWORD: Viera123!@"
 
   - name: Keep Alive
     shell: powershell
