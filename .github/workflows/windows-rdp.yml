@@ -36,7 +36,7 @@ jobs:
       - name: Configure RDP
         shell: powershell
         run: |
-          $Password = ConvertTo-SecureString "rumitsgt00" -AsPlainText -Force
+          $Password = ConvertTo-SecureString "GantiPasswordKuat123!" -AsPlainText -Force
           Set-LocalUser -Name "runneradmin" -Password $Password
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
