@@ -1,0 +1,78 @@
+name: Windows RDP Viera
+
+on:
+workflow_dispatch:
+inputs:
+tailscale_key:
+description: 'Masukkan Tailscale Auth Key'
+required: true
+type: string
+
+jobs:
+windows-rdp:
+runs-on: windows-latest
+timeout-minutes: 360
+
+steps:
+  - name: Info Pemilik VPS (Viera)
+    shell: powershell
+    run: |
+      Write-Host "=========================================="
+      Write-Host " VPS RDP MILIK: Viera"
+      Write-Host " LOKASI: Indonesia"
+      Write-Host "=========================================="
+
+      Get-CimInstance Win32_ComputerSystem |
+        Select-Object Name, TotalPhysicalMemory
+
+      Get-CimInstance Win32_Processor |
+        Select-Object Name
+
+  - name: Install Tailscale
+    shell: powershell
+    run: |
+      winget install --id Tailscale.Tailscale -e --silent --accept-source-agreements --accept-package-agreements
+
+  - name: Connect Tailscale
+    shell: powershell
+    env:
+      TS_AUTHKEY: ${{ inputs.tailscale_key }}
+    run: |
+      & "C:\Program Files\Tailscale\tailscale.exe" up --authkey="$env:TS_AUTHKEY" --accept-routes
+
+  - name: Configure Windows RDP
+    shell: powershell
+    run: |
+      $Password = ConvertTo-SecureString "Viera123!@" -AsPlainText -Force
+
+      Set-LocalUser -Name "runneradmin" -Password $Password
+
+      Set-ItemProperty `
+        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
+        -Name "fDenyTSConnections" -Value 0
+
+      Set-ItemProperty `
+        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+        -Name "UserAuthentication" -Value 1
+
+      Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+  - name: Display Tailscale IP
+    shell: powershell
+    run: |
+      Write-Host "=========================================="
+      Write-Host " RDP VIERA SIAP DIGUNAKAN"
+      Write-Host "=========================================="
+
+      & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+
+      Write-Host "USERNAME: runneradmin"
+      Write-Host "PASSWORD: Viera123!@"
+
+  - name: Keep Alive
+    shell: powershell
+    run: |
+      Write-Host "RDP Viera Aktif."
+      while ($true) {
+        Start-Sleep -Seconds 300
+      }
